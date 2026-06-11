@@ -2,7 +2,7 @@
 
 > An AI-native fraud investigation console for bank risk teams, built for the fictional **Northstar Financial**.
 
-![CI](https://github.com/saimadhav/riskos-ai/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/Mxs8513/RiskOSAI/actions/workflows/ci.yml/badge.svg)
 
 | Overview | Investigation | Risk Intelligence |
 |---|---|---|
