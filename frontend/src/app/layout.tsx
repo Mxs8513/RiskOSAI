@@ -4,9 +4,9 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "RiskOS AI — Fraud Operations Console",
+  title: "Reach — Fraud Operations Console",
   description:
-    "AI-native fraud investigation console for Northstar Financial (simulation environment, synthetic data).",
+    "AI-native risk operations for financial teams. Built for Northstar Financial (simulation environment, synthetic data).",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

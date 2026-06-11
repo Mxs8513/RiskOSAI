@@ -34,6 +34,36 @@ export function CardHeader({ title, subtitle, right }: { title: string; subtitle
   );
 }
 
+/* ------------------------------- Brand logo ------------------------------ */
+
+const EQ_BARS = [
+  { height: "42%", delay: "0s" },
+  { height: "72%", delay: "0.18s" },
+  { height: "100%", delay: "0.36s" },
+  { height: "64%", delay: "0.54s" },
+  { height: "38%", delay: "0.72s" },
+];
+
+/** Reach brand mark — rounded square with animated frequency bars. */
+export function BrandLogo({ size = 32, className }: { size?: number; className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "flex shrink-0 items-end justify-center gap-[2.5px] rounded-[28%]",
+        "bg-gradient-to-b from-[#6366F1] to-primary",
+        "shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_1px_3px_rgba(79,70,229,0.4)]",
+        className,
+      )}
+      style={{ width: size, height: size, paddingBottom: size * 0.26, paddingTop: size * 0.22 }}
+    >
+      {EQ_BARS.map((b, i) => (
+        <span key={i} className="eq-bar" style={{ height: b.height, animationDelay: b.delay }} />
+      ))}
+    </div>
+  );
+}
+
 /* ---------------------------------- Pill --------------------------------- */
 
 type PillTone = { bg: string; text: string; ring: string; dot: string; live?: boolean };

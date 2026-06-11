@@ -78,7 +78,7 @@ function IntelligenceInner() {
               <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
               <input
                 className="w-full rounded-lg border border-border pl-9 pr-3 py-2.5 text-sm shadow-[0_1px_2px_rgba(9,9,11,0.04)] transition-[border-color,box-shadow] duration-150 placeholder:text-faint hover:border-border-strong focus:border-primary focus:outline-none focus:shadow-focus-primary"
-                placeholder="Ask RiskOS about transactions, fraud alerts, rules, or audit logs..."
+                placeholder="Ask Reach about transactions, fraud alerts, rules, or audit logs..."
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && ask(question)}

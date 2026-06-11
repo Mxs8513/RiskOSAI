@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ShieldCheck, ScanSearch, FileCheck2, UserCheck } from "lucide-react";
+import { ArrowRight, ScanSearch, FileCheck2, UserCheck } from "lucide-react";
 import { api, setSession } from "@/lib/api";
-import { cn } from "@/components/ui";
+import { BrandLogo, cn } from "@/components/ui";
 
 type DemoUser = { email: string; name: string; role: string };
 
@@ -73,11 +73,9 @@ export default function LoginPage() {
         <div aria-hidden className="absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-[#6366F1]/15 blur-[120px]" />
 
         <div className="relative flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-gradient-to-b from-[#6366F1] to-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">
-            <ShieldCheck size={18} />
-          </div>
+          <BrandLogo size={36} />
           <div>
-            <p className="text-sm font-semibold tracking-[-0.01em]">RiskOS AI</p>
+            <p className="text-sm font-semibold tracking-[-0.01em]">Reach</p>
             <p className="text-[11px] text-white/50">Northstar Financial</p>
           </div>
         </div>
@@ -117,10 +115,8 @@ export default function LoginPage() {
         <div className="w-full max-w-sm animate-fade-up">
           <div className="mb-6 lg:hidden">
             <div className="mb-2 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-gradient-to-b from-[#6366F1] to-primary text-white">
-                <ShieldCheck size={16} />
-              </div>
-              <span className="text-base font-semibold tracking-[-0.01em]">RiskOS AI</span>
+              <BrandLogo size={32} />
+              <span className="text-base font-semibold tracking-[-0.01em]">Reach</span>
             </div>
             <p className="text-xs text-muted">Northstar Financial · Simulation environment, synthetic data only</p>
           </div>

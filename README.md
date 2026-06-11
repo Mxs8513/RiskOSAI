@@ -1,6 +1,6 @@
-# RiskOS AI — Fraud Operations Console
+# Reach — Fraud Operations Console
 
-> An AI-native fraud investigation console for bank risk teams, built for the fictional **Northstar Financial**.
+> AI-native risk operations for financial teams, built for the fictional **Northstar Financial**. *(Formerly RiskOS AI during development — internal module and API names retain the original codename.)*
 
 ![CI](https://github.com/Mxs8513/RiskOSAI/actions/workflows/ci.yml/badge.svg)
 

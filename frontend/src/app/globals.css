@@ -36,3 +36,16 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Brand logo — animated frequency bars */
+.eq-bar {
+  width: 2.5px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.95);
+  transform-origin: bottom;
+  animation: eq-bounce 1.15s ease-in-out infinite;
+}
+@keyframes eq-bounce {
+  0%, 100% { transform: scaleY(0.45); }
+  50% { transform: scaleY(1); }
+}

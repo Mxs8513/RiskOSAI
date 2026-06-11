@@ -1,4 +1,4 @@
-# RiskOS AI — 5-Minute Demo Script
+# Reach — 5-Minute Demo Script
 
 Setup (once): backend `python -m scripts.seed --reset && uvicorn app.main:app`,
 frontend `npm run dev`. Log in as **analyst@northstar.demo / demo1234**.

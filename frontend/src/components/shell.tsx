@@ -1,9 +1,9 @@
 "use client";
 import { API_URL, clearSession, getUser, can, User } from "@/lib/api";
-import { cn } from "@/components/ui";
+import { BrandLogo, cn } from "@/components/ui";
 import {
   Activity, BarChart3, BookOpenCheck, Brain, FileSearch, LayoutDashboard, LogOut,
-  MessageSquare, ScrollText, Search, Sparkles, TerminalSquare, ShieldAlert,
+  MessageSquare, ScrollText, Search, Sparkles, TerminalSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -88,11 +88,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       <aside className="flex w-[232px] shrink-0 flex-col border-r border-border bg-card" aria-label="Primary">
         <div className="px-4 pb-3 pt-4">
           <Link href="/overview" className="flex items-center gap-2.5 rounded-lg p-1 -m-1">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-gradient-to-b from-[#6366F1] to-primary text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_1px_3px_rgba(79,70,229,0.4)]">
-              <ShieldAlert size={16} />
-            </div>
+            <BrandLogo size={32} />
             <div>
-              <p className="text-[13px] font-semibold leading-tight tracking-[-0.01em]">RiskOS AI</p>
+              <p className="text-[13px] font-semibold leading-tight tracking-[-0.01em]">Reach</p>
               <p className="text-[10px] leading-tight text-muted">Fraud Operations</p>
             </div>
           </Link>
@@ -152,8 +150,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               ref={searchRef}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              aria-label="Search cases and transactions, or ask RiskOS"
-              placeholder="Search case, txn, or ask RiskOS…"
+              aria-label="Search cases and transactions, or ask Reach"
+              placeholder="Search case, txn, or ask Reach…"
               className={cn(
                 "w-full rounded-lg border border-border bg-subtle/70 py-1.5 pl-8 pr-12 text-xs",
                 "transition-[background-color,border-color,box-shadow] duration-150",

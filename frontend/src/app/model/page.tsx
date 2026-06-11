@@ -32,7 +32,7 @@ export default function ModelPerformancePage() {
             <Brain className="mx-auto text-muted mb-2" size={22} />
             <p className="text-sm font-medium mb-1">No model trained yet</p>
             <p className="text-xs text-muted mb-3">
-              RiskOS is running rules-only. Hybrid scoring activates automatically once a model artifact exists.
+              Reach is running rules-only. Hybrid scoring activates automatically once a model artifact exists.
             </p>
             <p className="font-mono text-xs bg-bg border border-border rounded-lg px-3 py-2 inline-block">
               cd backend && python -m scripts.train_model
@@ -134,7 +134,7 @@ export default function ModelPerformancePage() {
                 <span className="font-medium text-ink">recall</span> (how much fraud was caught — drives losses),{" "}
                 <span className="font-medium text-ink">F1</span> (their balance), and{" "}
                 <span className="font-medium text-ink">ROC-AUC</span> (how well the model ranks risk across thresholds).
-                This is also why RiskOS tracks the false-positive rate per rule and per reviewer decision.
+                This is also why Reach tracks the false-positive rate per rule and per reviewer decision.
               </p>
               <p>
                 The ML model is never the final authority: the deterministic rules stay visible as the explainability
