@@ -227,6 +227,13 @@ are planned for later phases.
 6. Metrics update: FP rate per rule, reviewer agreement, AI accuracy, review time
 7. All of it becomes queryable: *"Which rule caused the most false positives?"*
 
+## Deploy
+
+One-click-ish: backend on Render (via [render.yaml](render.yaml)), frontend on
+Vercel. Full step-by-step guide with exact settings, env vars, and smoke tests:
+**[DEPLOYMENT.md](DEPLOYMENT.md)**. The deployed demo runs entirely on synthetic
+data with SMS and external AI disabled by default — no secrets required.
+
 ## Run locally
 
 **Backend** (Python 3.11+):

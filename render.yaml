@@ -1,0 +1,29 @@
+# Render Blueprint — deploys the RiskOS AI backend.
+# Dashboard: New + -> Blueprint -> select this repo, or create a Web Service
+# manually with the same settings.
+services:
+  - type: web
+    name: riskos-ai-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    # Train the ML model at build time (artifact is gitignored, so it must be
+    # produced here); requirements-dev includes scikit-learn + test deps.
+    buildCommand: pip install -r requirements-dev.txt && python -m scripts.train_model
+    # Seed is idempotent — it exits immediately if demo users already exist.
+    startCommand: python -m scripts.seed && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SMS_ENABLED
+        value: "false"          # demo-safe: never call Twilio in deployment
+      - key: MOCK_AI
+        value: "true"           # deterministic AI provider; no API key needed
+      - key: DATABASE_URL
+        value: sqlite:///./riskos.db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false             # set manually to your Vercel URL after frontend deploy,
+                                # e.g. https://riskos-ai.vercel.app,http://localhost:3000
