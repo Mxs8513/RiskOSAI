@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-bg text-ink antialiased;
+  font-feature-settings: "tnum" 1, "cv11" 1, "ss01" 1;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: #e0e7ff; }
+
+/* Accessible, consistent focus rings */
+:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Quiet scrollbars */
+* { scrollbar-width: thin; scrollbar-color: #d4d4d8 transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 8px; }
+*::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* Number columns stay aligned */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* Respect users who opt out of motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
