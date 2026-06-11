@@ -4,6 +4,10 @@
 
 ![CI](https://github.com/Mxs8513/RiskOSAI/actions/workflows/ci.yml/badge.svg)
 
+**🔗 Live demo:** [risk-osai.vercel.app](https://risk-osai.vercel.app) · **API health:** [riskos-ai-api.onrender.com/health](https://riskos-ai-api.onrender.com/health)
+Sign in with `analyst@northstar.demo` / `demo1234` (one-click demo accounts on the login page).
+*The backend is on Render's free tier — the first request after ~15 min idle takes ~60s to wake.*
+
 | Overview | Investigation | Risk Intelligence |
 |---|---|---|
 | ![Overview dashboard](docs/overview.png) | ![Investigation case detail](docs/investigation.png) | ![Risk Intelligence query](docs/intelligence.png) |

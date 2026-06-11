@@ -1,7 +1,14 @@
 # Reach — 5-Minute Demo Script
 
-Setup (once): backend `python -m scripts.seed --reset && uvicorn app.main:app`,
-frontend `npm run dev`. Log in as **analyst@northstar.demo / demo1234**.
+**Live:** [risk-osai.vercel.app](https://risk-osai.vercel.app) — just open it and log in as
+**analyst@northstar.demo / demo1234** (or use the one-click demo accounts).
+
+> **Before a live demo:** the backend is on Render's free tier and spins down
+> after ~15 min idle. Open [riskos-ai-api.onrender.com/health](https://riskos-ai-api.onrender.com/health)
+> a minute beforehand so it's awake (first cold request takes ~60s).
+
+Local fallback (once): backend `python -m scripts.seed --reset && uvicorn app.main:app`,
+frontend `npm run dev`.
 
 ## 1. Overview (45s)
 - Point at the KPI grid: **automation rate ~94%**, human reviews avoided,

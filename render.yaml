@@ -19,7 +19,13 @@ services:
       - key: SMS_ENABLED
         value: "false"          # demo-safe: never call Twilio in deployment
       - key: MOCK_AI
-        value: "true"           # deterministic AI provider; no API key needed
+        value: "false"          # real Claude when ANTHROPIC_API_KEY is set;
+                                # auto-falls back to mock when it isn't (no crash)
+      - key: ANTHROPIC_API_KEY
+        sync: false             # set in the Render dashboard — never in the repo.
+                                # Leave unset to run the deterministic mock provider.
+      - key: ANTHROPIC_MODEL
+        value: claude-haiku-4-5 # cheapest model ($1/$5 per MTok)
       - key: DATABASE_URL
         value: sqlite:///./riskos.db
       - key: JWT_SECRET
