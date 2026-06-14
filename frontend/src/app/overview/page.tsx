@@ -9,6 +9,7 @@ import {
 import Shell, { PageHeader } from "@/components/shell";
 import { Card, CardHeader, ChartTip, CHART, Pill, RiskScore, Skeleton, StatCard, Table } from "@/components/ui";
 import { api, fmtMoney, fmtPct, fmtTime } from "@/lib/api";
+import { DemoNotice } from "@/components/demo-notice";
 
 function pctDelta(series: number[]): number | null {
   if (!series || series.length < 2) return null;
@@ -45,6 +46,8 @@ export default function OverviewPage() {
   return (
     <Shell>
       <PageHeader title="Overview" subtitle="Fraud operations at a glance — synthetic transaction stream" />
+
+      <DemoNotice />
 
       {!ov ? <Skeleton rows={2} /> : (
         <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4">

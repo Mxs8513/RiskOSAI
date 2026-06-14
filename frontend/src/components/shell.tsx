@@ -1,6 +1,7 @@
 "use client";
-import { API_URL, clearSession, getUser, can, User } from "@/lib/api";
+import { API_URL, clearSession, getUser, can, isDemoMode, User } from "@/lib/api";
 import { BrandLogo, cn } from "@/components/ui";
+import { ApiStatusBadge } from "@/components/api-status";
 import {
   Activity, BarChart3, BookOpenCheck, Brain, FileSearch, LayoutDashboard, LogOut,
   MessageSquare, ScrollText, Search, Sparkles, TerminalSquare,
@@ -38,6 +39,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     const u = getUser();
     if (!u) { router.replace("/login"); return; }
     setUser(u);
+    if (isDemoMode()) { setAiProvider("mock"); return; }
     fetch(`${API_URL}/health`)
       .then((r) => r.json())
       .then((h) => setAiProvider(h.ai_provider))
@@ -163,6 +165,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             </kbd>
           </form>
           <div className="flex shrink-0 items-center gap-2">
+            <ApiStatusBadge className="hidden md:inline-flex" />
             {aiProvider && (
               <span
                 title="Which AI backend generates evidence packets and summaries"

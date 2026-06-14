@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ScanSearch, FileCheck2, UserCheck } from "lucide-react";
-import { api, setSession } from "@/lib/api";
+import { ArrowRight, ScanSearch, FileCheck2, UserCheck, Play } from "lucide-react";
+import { api, setSession, startDemoSession, DEMO_USERS_PUBLIC } from "@/lib/api";
 import { BrandLogo, cn } from "@/components/ui";
+import { ApiStatusBadge } from "@/components/api-status";
 
 type DemoUser = { email: string; name: string; role: string };
 
@@ -30,8 +31,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    api<DemoUser[]>("/auth/demo-users").then(setDemoUsers).catch(() => {});
+    // Resilient: if the backend is cold, fall back to the public demo roster so
+    // the one-click accounts always render.
+    api<DemoUser[]>("/auth/demo-users")
+      .then((u) => setDemoUsers(u?.length ? u : DEMO_USERS_PUBLIC))
+      .catch(() => setDemoUsers(DEMO_USERS_PUBLIC));
   }, []);
+
+  function openDemo() {
+    startDemoSession();
+    router.push("/overview");
+  }
 
   async function submit(em: string, pw: string, key = "form") {
     setError(null);
@@ -121,8 +131,37 @@ export default function LoginPage() {
             <p className="text-xs text-muted">Northstar Financial · Simulation environment, synthetic data only</p>
           </div>
 
-          <h2 className="text-xl font-semibold tracking-[-0.02em]">Sign in to the console</h2>
-          <p className="mb-6 mt-1 text-xs text-muted">Use a demo account below, or enter credentials manually.</p>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="text-xl font-semibold tracking-[-0.02em]">Sign in to the console</h2>
+            <ApiStatusBadge />
+          </div>
+          <p className="text-xs leading-relaxed text-muted">
+            Explore a live-style fraud operations demo with seeded transactions, investigations,
+            risk scoring, and audit workflows.
+          </p>
+
+          {/* Primary recruiter entry — instant, no credentials, fully seeded */}
+          <button
+            onClick={openDemo}
+            className={cn(
+              "mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2.5 text-sm font-medium text-white",
+              "shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_1px_2px_rgba(9,9,11,0.18)]",
+              "transition-[background-color,transform] duration-150 hover:bg-primary-hover active:scale-[0.98]",
+              "focus-visible:shadow-focus-primary",
+            )}
+          >
+            <Play size={15} className="fill-current" />
+            Open Demo Dashboard
+          </button>
+          <p className="mt-2 text-center text-[10px] text-faint">
+            No login required · seeded demo data · works even while the live API wakes up
+          </p>
+
+          <div className="my-5 flex items-center gap-3">
+            <span className="h-px flex-1 bg-border" aria-hidden />
+            <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-faint">Or sign in</p>
+            <span className="h-px flex-1 bg-border" aria-hidden />
+          </div>
 
           <form
             onSubmit={(e) => { e.preventDefault(); submit(email, password); }}
