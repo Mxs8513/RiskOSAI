@@ -44,8 +44,8 @@ export default function AuditPage() {
 
       <Card>
         {!data ? <div className="p-4"><Skeleton rows={10} /></div> : (
-          <Table head={["", "Time", "Event", "Actor", "Transaction", "Investigation", "Message"]} empty={data.logs.length === 0}>
-            {data.logs.map((a) => (
+          <Table head={["", "Time", "Event", "Actor", "Transaction", "Investigation", "Message"]} empty={(data.logs?.length ?? 0) === 0}>
+            {(data.logs ?? []).map((a) => (
               <>
                 <tr
                   key={a.id}

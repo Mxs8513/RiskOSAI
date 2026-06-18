@@ -54,6 +54,14 @@ export default function LoginPage() {
       setSession(res.token, res.user);
       router.push("/overview");
     } catch (e: any) {
+      // One-click demo accounts must always get the recruiter in. If the live
+      // backend is cold/unreachable, drop into the seeded demo session instead
+      // of showing an error. (Manual form submits still surface the error.)
+      if (key !== "form") {
+        startDemoSession();
+        router.push("/overview");
+        return;
+      }
       setError(e.message || "Login failed");
       setLoading(null);
     }

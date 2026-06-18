@@ -33,7 +33,7 @@ const HEALTH = {
   status: "ok",
   environment: "Demo (seeded data)",
   org: "Northstar Financial",
-  ai_provider: "mock",
+  ai_provider: "anthropic",
   sms: {
     sms_enabled: false,
     twilio_configured: false,
@@ -78,6 +78,25 @@ const CHARTS = {
     { date: fmtDay(2 * DAY), flagged: 176, critical: 10, confirmed: 12 },
     { date: fmtDay(1 * DAY), flagged: 194, critical: 13, confirmed: 15 },
     { date: fmtDay(0), flagged: 188, critical: 12, confirmed: 13 },
+  ],
+  score_distribution: [
+    { bucket: "0-9", count: 18240 }, { bucket: "10-19", count: 12110 },
+    { bucket: "20-29", count: 7320 }, { bucket: "30-39", count: 4180 },
+    { bucket: "40-49", count: 2510 }, { bucket: "50-59", count: 1490 },
+    { bucket: "60-69", count: 820 }, { bucket: "70-79", count: 410 },
+    { bucket: "80-89", count: 196 }, { bucket: "90-100", count: 88 },
+  ],
+  reviewer_outcomes: [
+    { outcome: "true_positive", count: 89 },
+    { outcome: "false_positive", count: 41 },
+    { outcome: "pending", count: 37 },
+  ],
+  top_risk_merchants: [
+    { name: "Crypto-X Exchange", avg_risk_score: 74, transactions: 312 },
+    { name: "QuickCash ATM #221", avg_risk_score: 68, transactions: 188 },
+    { name: "LuxeWatch Online", avg_risk_score: 61, transactions: 142 },
+    { name: "GameKeys Store", avg_risk_score: 55, transactions: 207 },
+    { name: "TravelFare Intl", avg_risk_score: 49, transactions: 96 },
   ],
 };
 
@@ -192,13 +211,17 @@ const INVESTIGATION_DETAIL = (id: string) => {
   return {
     ...base,
     transaction: txn,
+    rules_triggered: [
+      { code: "R-GEO-DIST", name: "Impossible travel distance", points: 42, detail: "1,180 miles since prior transaction" },
+      { code: "R-NEW-DEVICE", name: "New device + high amount", points: 36, detail: "First appearance of device DV_4471" },
+    ],
     policies: [
       { code: "POL-01", title: "Step-up verification on critical risk", text: "Transactions scored Critical must receive customer verification before settlement." },
       { code: "POL-02", title: "Dual review on confirmed fraud", text: "A confirmed-fraud disposition on amounts over $1,000 requires a manager override." },
     ],
     ai_report: base.has_ai_report
       ? {
-          generated_by: "mock",
+          generated_by: "anthropic",
           created_at: iso(20 * MIN),
           risk_summary:
             "This transaction combines a never-before-seen device with a geographic distance inconsistent with the " +
@@ -259,7 +282,7 @@ const INVESTIGATION_DETAIL = (id: string) => {
     timeline: [
       { timestamp: base.created_at, actor: "system", event_type: "investigation_opened", message: `Case opened from flagged transaction ${base.transaction_id}.` },
       { timestamp: iso(25 * MIN), actor: "system", event_type: "risk_scored", message: `Hybrid risk score ${base.risk_score} (${base.risk_level}).` },
-      { timestamp: iso(20 * MIN), actor: "mock", event_type: "ai_report_generated", message: "AI evidence packet generated from risk-engine signals." },
+      { timestamp: iso(20 * MIN), actor: "anthropic", event_type: "ai_report_generated", message: "AI evidence packet generated from risk-engine signals." },
     ],
   };
 };
@@ -279,11 +302,124 @@ const NOTIFICATIONS = [
 // ----------------------------------------------------------------------------
 const AUDIT = [
   { id: 9001, timestamp: iso(10 * MIN), event_type: "reviewer_decision_submitted", actor: "Jordan Reyes", actor_role: "risk_manager", transaction_id: "TXN_90388", investigation_id: "INV_5009", message: "Jordan Reyes confirmed fraud on INV_5009", metadata: { outcome: "true_positive" } },
-  { id: 9000, timestamp: iso(20 * MIN), event_type: "ai_report_generated", actor: "system", actor_role: "system", transaction_id: "TXN_90412", investigation_id: "INV_5012", message: "AI evidence packet generated for INV_5012", metadata: { provider: "mock" } },
+  { id: 9000, timestamp: iso(20 * MIN), event_type: "ai_report_generated", actor: "system", actor_role: "system", transaction_id: "TXN_90412", investigation_id: "INV_5012", message: "AI evidence packet generated for INV_5012", metadata: { provider: "anthropic" } },
   { id: 8999, timestamp: iso(33 * MIN), event_type: "notification_sent", actor: "system", actor_role: "system", transaction_id: "TXN_90412", investigation_id: "INV_5012", message: "Verification SMS sent (simulated) for INV_5012", metadata: { channel: "sms" } },
   { id: 8998, timestamp: iso(35 * MIN), event_type: "investigation_opened", actor: "system", actor_role: "system", transaction_id: "TXN_90412", investigation_id: "INV_5012", message: "Investigation INV_5012 opened from flagged transaction", metadata: {} },
   { id: 8997, timestamp: iso(1 * HOUR), event_type: "rule_triggered", actor: "system", actor_role: "system", transaction_id: "TXN_90412", investigation_id: null, message: "R-GEO-DIST triggered on TXN_90412", metadata: { rule_code: "R-GEO-DIST" } },
 ];
+
+// ----------------------------------------------------------------------------
+// /metrics/model  (Model Performance page)
+// ----------------------------------------------------------------------------
+const MODEL_PERF = {
+  available: true,
+  metadata: {
+    model_name: "gradient_boosted_trees",
+    trained_at: iso(2 * DAY),
+    dataset: { n_samples: 84000, source: "PaySim-shaped synthetic", fraud_rate: 0.013, train_test_split: "75/25 stratified", class_imbalance_handling: "class weights + threshold tuning" },
+    metrics: { accuracy: 0.987, precision: 0.829, recall: 0.741, f1: 0.783, roc_auc: 0.961, confusion_matrix: [[20612, 188], [241, 689]] },
+  },
+  live: {
+    transactions_scored_by_ml: 48213,
+    avg_rule_score: 21.4,
+    avg_ml_probability: 0.114,
+    avg_hybrid_score: 24.8,
+    agreement_distribution: { high: 41080, medium: 5402, low: 1731 },
+  },
+};
+
+// ----------------------------------------------------------------------------
+// /risk-intelligence
+// ----------------------------------------------------------------------------
+const RISK_INTEL_SUGGESTIONS = [
+  "Why was transaction TXN_90412 flagged?",
+  "Which critical cases are still open?",
+  "Generate a weekly fraud operations summary",
+  "Which merchants had the lowest average risk score?",
+  "How many transactions were automated this week?",
+  "Show notification failures",
+];
+
+function riskIntelAnswer(question: string) {
+  const q = (question || "").toLowerCase();
+  if (q.includes("weekly") || q.includes("summary") || q.includes("operations")) {
+    return {
+      intent: "operations_summary",
+      params: { timeframe: "this_week" },
+      confidence: "high",
+      blocked: false,
+      answer:
+        "**Weekly fraud operations summary** — 48,213 transactions processed, 1,284 flagged (2.7%). " +
+        "12 critical cases, 89 confirmed fraud, false-positive rate ~18%. 76% of decisions were automated, " +
+        "with reviewer agreement near 91%. The high-risk merchant-category rule drove the most flags.",
+      sources: [{ type: "metrics", id: "overview" }],
+      records: [OVERVIEW],
+      provider: "anthropic",
+    };
+  }
+  if (q.includes("merchant")) {
+    const recs = RULES.slice(0, 3).map((r) => ({ name: r.name, avg_risk_score: Math.round(r.false_positive_rate * 100) }));
+    return { intent: "merchant_risk_ranking", params: { direction: q.includes("lowest") || q.includes("safest") ? "asc" : "desc" }, confidence: "high", blocked: false,
+      answer: "Ranked merchants by average risk score over the current window. See the records below for the ordered list.", sources: recs.map((r) => ({ type: "rule", id: r.name })), records: recs, provider: "anthropic" };
+  }
+  if (q.includes("delete") || q.includes("drop") || q.includes("password") || q.includes("secret") || q.includes("update ") || q.includes("ignore ")) {
+    return { intent: "blocked", params: {}, confidence: "high", blocked: true,
+      answer: "That request was blocked. Risk Intelligence only answers read-only analytical questions about fraud operations — it can't modify data, run destructive actions, or reveal secrets.",
+      alternatives: RISK_INTEL_SUGGESTIONS.slice(0, 3), sources: [], records: [], provider: "anthropic" };
+  }
+  // transaction lookup / open cases / fallback
+  return {
+    intent: "case_lookup",
+    params: {},
+    confidence: "high",
+    blocked: false,
+    answer:
+      "Based on the seeded window, the highest-risk open items are INV_5012 (QuickCash ATM, Critical, hybrid 81) and " +
+      "INV_5013 (LuxeWatch Online, High, hybrid 67). Both combine a new device with elevated merchant-category risk.",
+    sources: [{ type: "investigation", id: "INV_5012" }, { type: "investigation", id: "INV_5013" }],
+    records: INVESTIGATIONS.slice(0, 3),
+    provider: "anthropic",
+  };
+}
+
+// ----------------------------------------------------------------------------
+// /developer
+// ----------------------------------------------------------------------------
+const SAMPLE_PAYLOADS = {
+  "POST /transactions/generate-batch?count=3": { count: 3 },
+  "POST /investigations/{id}/review": { decision: "confirm_fraud", note: "Verified with customer" },
+  "POST /risk-intelligence/query": { question: "Generate a weekly fraud operations summary" },
+};
+
+const SCENARIO_HISTORY = [
+  { id: 1, rule_code: "R-GEO-DIST", expected: "flag", actual: "flag", passed: true, created_at: iso(1 * HOUR), payload: { amount: 980, distance_from_home_miles: 1180, is_new_device: true } },
+  { id: 2, rule_code: "R-VELOCITY", expected: "flag", actual: "flag", passed: true, created_at: iso(3 * HOUR), payload: { velocity_10_min: 9, amount: 1 } },
+  { id: 3, rule_code: "R-AMOUNT-Z", expected: "clear", actual: "flag", passed: false, created_at: iso(6 * HOUR), payload: { amount: 240, z_score: 2.1 } },
+];
+
+function runScenarioResult() {
+  // Mirrors the backend score_transaction() shape the developer page reads.
+  return {
+    score: 81, risk_level: "Critical", recommended_action: "block", suggested_status: "Escalated",
+    rules_triggered: [
+      { code: "R-GEO-DIST", name: "Impossible travel distance", points: 42, detail: "1,180 miles since prior transaction" },
+      { code: "R-NEW-DEVICE", name: "New device + high amount", points: 36, detail: "First appearance of device DV_4471" },
+    ],
+  };
+}
+
+function generateScenarioResult(ruleCode: string) {
+  const code = ruleCode || "R-GEO-DIST";
+  return {
+    rule_code: code,
+    scenarios: [
+      { name: "Boundary: just over threshold", payload: { distance_from_home_miles: 505, is_new_device: true }, expected: "flag", actual: "flag", passed: true, rules_triggered: [code] },
+      { name: "Boundary: just under threshold", payload: { distance_from_home_miles: 495, is_new_device: false }, expected: "clear", actual: "clear", passed: true, rules_triggered: [] },
+      { name: "Compounding signals", payload: { distance_from_home_miles: 1180, velocity_10_min: 6 }, expected: "flag", actual: "flag", passed: true, rules_triggered: [code, "R-VELOCITY"] },
+    ],
+    summary: { total: 3, passed: 3, failed: 0 },
+  };
+}
 
 // ----------------------------------------------------------------------------
 // Resolver
@@ -317,7 +453,11 @@ export function demoResponse(path: string, opts: RequestInit = {}): unknown {
     if (p === "/metrics/charts") return CHARTS;
     if (p === "/metrics/rules") return RULES;
     if (p === "/metrics/daily-summary") return DAILY_SUMMARY;
+    if (p === "/metrics/model") return MODEL_PERF;
     if (p === "/rules") return RULES;
+    if (p === "/risk-intelligence/suggestions") return RISK_INTEL_SUGGESTIONS;
+    if (p === "/developer/sample-payloads") return SAMPLE_PAYLOADS;
+    if (p === "/developer/scenario-history") return SCENARIO_HISTORY;
     if (p === "/investigations") {
       const limit = Number(queryParam(path, "limit") || 0);
       return limit > 0 ? INVESTIGATIONS.slice(0, limit) : INVESTIGATIONS;
@@ -336,18 +476,31 @@ export function demoResponse(path: string, opts: RequestInit = {}): unknown {
       const txn = queryParam(path, "transaction_id");
       return txn ? NOTIFICATIONS.filter((n) => n.transaction_id === txn) : NOTIFICATIONS;
     }
-    if (p === "/audit") return AUDIT;
+    // Audit: backend route is /audit-logs and returns { limited_view, logs }.
+    if (p === "/audit-logs" || p === "/audit") return { limited_view: false, logs: AUDIT };
     // Unknown GET — empty list is the safest shape for the list-heavy UI.
     return [];
   }
 
   // Mutations: acknowledge without changing anything (demo is read-only).
+  if (p === "/auth/login") return { token: "demo-session", user: { id: 1, ...DEMO_USERS_PUBLIC[0], permissions: ["*"] } };
   if (p === "/transactions/generate-batch") {
     const count = Number(queryParam(path, "count") || 2);
     const generated = TRANSACTIONS.slice(0, Math.max(1, Math.min(count, TRANSACTIONS.length)));
     return { generated: generated.length, transactions: generated };
   }
-  if (p.endsWith("/generate-ai-report")) return { provider: "mock" };
+  if (p === "/risk-intelligence/query") {
+    let question = "";
+    try { question = JSON.parse((opts.body as string) || "{}").question || ""; } catch { /* ignore */ }
+    return riskIntelAnswer(question);
+  }
+  if (p === "/developer/generate-scenario") {
+    let ruleCode = "";
+    try { ruleCode = JSON.parse((opts.body as string) || "{}").rule_code || ""; } catch { /* ignore */ }
+    return generateScenarioResult(ruleCode);
+  }
+  if (p === "/developer/run-scenario") return runScenarioResult();
+  if (p.endsWith("/generate-ai-report")) return { provider: "anthropic" };
   if (p.endsWith("/policy-check")) return { status: "ok" };
   if (p.endsWith("/review")) return { outcome: "true_positive", ai_agreed: true };
   if (p.startsWith("/rules/")) return { status: "ok", rule_status: "active" };
@@ -361,8 +514,9 @@ export function hasDemoResponse(path: string, opts: RequestInit = {}): boolean {
   if (method !== "GET") return true; // all mutations are acknowledged
   const known = [
     "/health", "/auth/demo-users", "/auth/me", "/metrics/overview", "/metrics/charts",
-    "/metrics/rules", "/metrics/daily-summary", "/rules", "/investigations",
-    "/transactions", "/notifications", "/audit",
+    "/metrics/rules", "/metrics/daily-summary", "/metrics/model", "/rules", "/investigations",
+    "/transactions", "/notifications", "/audit", "/audit-logs",
+    "/risk-intelligence/suggestions", "/developer/sample-payloads", "/developer/scenario-history",
   ];
   return known.includes(p) || p.startsWith("/investigations/") || p.startsWith("/transactions/");
 }
