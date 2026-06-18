@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ScanSearch, FileCheck2, UserCheck, Play } from "lucide-react";
-import { api, setSession, startDemoSession, DEMO_USERS_PUBLIC } from "@/lib/api";
+import { api, setSession, startDemoSession, wakeBackend, DEMO_USERS_PUBLIC } from "@/lib/api";
 import { BrandLogo, cn } from "@/components/ui";
 import { ApiStatusBadge } from "@/components/api-status";
 
@@ -29,6 +29,7 @@ export default function LoginPage() {
   const [demoUsers, setDemoUsers] = useState<DemoUser[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
+  const [waking, setWaking] = useState(false);
 
   useEffect(() => {
     // Resilient: if the backend is cold, fall back to the public demo roster so
@@ -46,23 +47,43 @@ export default function LoginPage() {
   async function submit(em: string, pw: string, key = "form") {
     setError(null);
     setLoading(key);
-    try {
-      const res = await api<{ token: string; user: any }>("/auth/login", {
+    const attempt = () =>
+      api<{ token: string; user: any }>("/auth/login", {
         method: "POST",
         body: JSON.stringify({ email: em, password: pw }),
       });
+    try {
+      const res = await attempt();
       setSession(res.token, res.user);
       router.push("/overview");
+      return;
     } catch (e: any) {
-      // One-click demo accounts must always get the recruiter in. If the live
-      // backend is cold/unreachable, drop into the seeded demo session instead
-      // of showing an error. (Manual form submits still surface the error.)
+      // Backend is likely cold-starting. Wake it and retry a REAL login so the
+      // recruiter lands on the live backend — every Risk Intelligence question
+      // then hits real Claude, not seeded fallback data.
+      setWaking(true);
+      const awake = await wakeBackend();
+      setWaking(false);
+      if (awake) {
+        try {
+          const res = await attempt();
+          setSession(res.token, res.user);
+          router.push("/overview");
+          return;
+        } catch (err: any) {
+          setError(err.message || "Login failed");
+          setLoading(null);
+          return;
+        }
+      }
+      // Backend unreachable after retries — last resort so the recruiter still
+      // gets in (seeded demo). One-click accounts never dead-end on an error.
       if (key !== "form") {
         startDemoSession();
         router.push("/overview");
         return;
       }
-      setError(e.message || "Login failed");
+      setError(e.message || "Login failed — try the “Explore demo” button.");
       setLoading(null);
     }
   }
@@ -186,6 +207,7 @@ export default function LoginPage() {
               value={password} onChange={(e) => setPassword(e.target.value)} placeholder="demo1234"
             />
             {error && <p role="alert" className="mb-3 rounded-lg bg-danger-soft px-3 py-2 text-xs text-danger ring-1 ring-inset ring-danger-border">{error}</p>}
+            {waking && <p className="mb-3 rounded-lg bg-primary-soft px-3 py-2 text-xs text-primary ring-1 ring-inset ring-primary/20">Waking the live backend… this can take ~30s on the free tier. Hang tight — you’ll get the real AI.</p>}
             <button
               type="submit" disabled={loading === "form"}
               className={cn(
