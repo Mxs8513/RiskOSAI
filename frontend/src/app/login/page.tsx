@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ScanSearch, FileCheck2, UserCheck, Play } from "lucide-react";
+import { ArrowRight, ScanSearch, FileCheck2, UserCheck } from "lucide-react";
 import { api, setSession, startDemoSession, wakeBackend, DEMO_USERS_PUBLIC } from "@/lib/api";
 import { BrandLogo, cn } from "@/components/ui";
 import { ApiStatusBadge } from "@/components/api-status";
@@ -39,10 +39,6 @@ export default function LoginPage() {
       .catch(() => setDemoUsers(DEMO_USERS_PUBLIC));
   }, []);
 
-  function openDemo() {
-    startDemoSession();
-    router.push("/overview");
-  }
 
   async function submit(em: string, pw: string, key = "form") {
     setError(null);
@@ -166,31 +162,60 @@ export default function LoginPage() {
             <h2 className="text-xl font-semibold tracking-[-0.02em]">Sign in to the console</h2>
             <ApiStatusBadge />
           </div>
-          <p className="text-xs leading-relaxed text-muted">
-            Explore a live-style fraud operations demo with seeded transactions, investigations,
-            risk scoring, and audit workflows.
+          <p className="mt-1 text-xs leading-relaxed text-muted">
+            Choose a demo account below to explore the platform. Select <span className="font-medium text-ink">Admin</span> to
+            view all features, including rules, metrics, audit logs, notifications, model performance, and developer tools.
           </p>
 
-          {/* Primary recruiter entry — instant, no credentials, fully seeded */}
-          <button
-            onClick={openDemo}
-            className={cn(
-              "mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2.5 text-sm font-medium text-white",
-              "shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_1px_2px_rgba(9,9,11,0.18)]",
-              "transition-[background-color,transform] duration-150 hover:bg-primary-hover active:scale-[0.98]",
-              "focus-visible:shadow-focus-primary",
-            )}
-          >
-            <Play size={15} className="fill-current" />
-            Open Demo Dashboard
-          </button>
-          <p className="mt-2 text-center text-[10px] text-faint">
-            No login required · seeded demo data · works even while the live API wakes up
-          </p>
+          {/* Primary CTA — one-click demo accounts */}
+          {demoUsers.length > 0 && (
+            <div className="mt-4 space-y-1.5">
+              {[...demoUsers].sort((a, b) => (b.role === "admin" ? 1 : 0) - (a.role === "admin" ? 1 : 0)).map((u) => {
+                const isAdmin = u.role === "admin";
+                return (
+                  <button
+                    key={u.email}
+                    onClick={() => submit(u.email, "demo1234", u.email)}
+                    disabled={loading !== null}
+                    className={cn(
+                      "group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left shadow-card",
+                      "transition-[box-shadow,transform] duration-150 hover:shadow-lift active:scale-[0.99] disabled:opacity-50",
+                      isAdmin ? "bg-primary-soft ring-1 ring-inset ring-primary/40" : "bg-card",
+                    )}
+                  >
+                    <span className={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
+                      isAdmin ? "bg-primary text-white" : "bg-gradient-to-b from-subtle to-border",
+                    )}>
+                      {u.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2">
+                        <span className="truncate text-xs font-medium">{u.name}</span>
+                        {isAdmin && (
+                          <span className="shrink-0 rounded-full bg-primary px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide text-white">
+                            Recommended
+                          </span>
+                        )}
+                      </span>
+                      <span className="block text-[11px] text-muted">
+                        {ROLE_LABEL[u.role] || u.role}{isAdmin ? " · best for the full demo" : ""}
+                      </span>
+                    </span>
+                    {loading === u.email
+                      ? <span className="text-[11px] text-muted">Signing in…</span>
+                      : <ArrowRight size={14} className={cn("transition-transform duration-150 group-hover:translate-x-0.5", isAdmin ? "text-primary" : "text-faint group-hover:text-primary")} />}
+                  </button>
+                );
+              })}
+              <p className="pt-1 text-center text-[10px] text-faint">No setup required · seeded demo data · works even while the live API wakes up</p>
+            </div>
+          )}
 
+          {/* Secondary — manual sign-in */}
           <div className="my-5 flex items-center gap-3">
             <span className="h-px flex-1 bg-border" aria-hidden />
-            <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-faint">Or sign in</p>
+            <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-faint">Or sign in manually</p>
             <span className="h-px flex-1 bg-border" aria-hidden />
           </div>
 
@@ -213,50 +238,14 @@ export default function LoginPage() {
             <button
               type="submit" disabled={loading === "form"}
               className={cn(
-                "w-full rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white",
-                "shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_1px_2px_rgba(9,9,11,0.18)]",
-                "transition-[background-color,transform] duration-150 hover:bg-primary-hover active:scale-[0.98]",
-                "focus-visible:shadow-focus-primary disabled:opacity-50",
+                "w-full rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-ink",
+                "transition-colors duration-150 hover:bg-subtle disabled:opacity-50",
               )}
             >
               {loading === "form" ? "Signing in…" : "Sign in"}
             </button>
           </form>
-
-          {demoUsers.length > 0 && (
-            <div className="mt-6">
-              <div className="mb-2.5 flex items-center gap-3">
-                <span className="h-px flex-1 bg-border" aria-hidden />
-                <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-faint">One-click demo accounts</p>
-                <span className="h-px flex-1 bg-border" aria-hidden />
-              </div>
-              <div className="space-y-1.5">
-                {demoUsers.map((u) => (
-                  <button
-                    key={u.email}
-                    onClick={() => submit(u.email, "demo1234", u.email)}
-                    disabled={loading !== null}
-                    className={cn(
-                      "group flex w-full items-center gap-3 rounded-xl bg-card px-3 py-2.5 text-left shadow-card",
-                      "transition-[box-shadow,transform] duration-150 hover:shadow-lift active:scale-[0.99] disabled:opacity-50",
-                    )}
-                  >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-subtle to-border text-[11px] font-semibold">
-                      {u.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-xs font-medium">{u.name}</span>
-                      <span className="block text-[11px] text-muted">{ROLE_LABEL[u.role] || u.role}</span>
-                    </span>
-                    {loading === u.email
-                      ? <span className="text-[11px] text-muted">Signing in…</span>
-                      : <ArrowRight size={14} className="text-faint transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-primary" />}
-                  </button>
-                ))}
-              </div>
-              <p className="mt-2.5 text-center text-[10px] text-faint">All demo accounts use the password demo1234</p>
-            </div>
-          )}
+          <p className="mt-2.5 text-center text-[10px] text-faint">All demo accounts use the password demo1234</p>
         </div>
       </div>
     </div>
