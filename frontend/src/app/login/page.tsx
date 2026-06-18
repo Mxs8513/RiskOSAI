@@ -77,9 +77,11 @@ export default function LoginPage() {
         }
       }
       // Backend unreachable after retries — last resort so the recruiter still
-      // gets in (seeded demo). One-click accounts never dead-end on an error.
+      // gets in (seeded demo). Carry the clicked account's identity so the
+      // console shows e.g. "Avery Chen", never a generic demo user.
       if (key !== "form") {
-        startDemoSession();
+        const picked = demoUsers.find((u) => u.email === em);
+        startDemoSession(picked ? { email: picked.email, name: picked.name, role: picked.role } : undefined);
         router.push("/overview");
         return;
       }

@@ -15,11 +15,13 @@ const WAKE_INTERVAL_MS = 4000;
 export type User = { id: number; email: string; name: string; role: string; permissions: string[] };
 
 export const DEMO_TOKEN = "demo-session";
+// Believable default persona for the standalone "Explore demo" button — never a
+// generic "demo" identity. Full permissions so every page is explorable.
 export const DEMO_USER: User = {
-  id: 0,
-  email: "demo@northstar.demo",
-  name: "Recruiter Demo",
-  role: "admin",
+  id: 1,
+  email: "analyst@northstar.demo",
+  name: "Avery Chen",
+  role: "fraud_analyst",
   permissions: ["*"],
 };
 
@@ -60,11 +62,19 @@ export function isDemoMode(): boolean {
   return localStorage.getItem("riskos_demo") === "1";
 }
 
-/** Enter the recruiter demo: a local session backed entirely by seeded data. */
-export function startDemoSession() {
+/**
+ * Enter the recruiter demo: a local session backed entirely by seeded data.
+ * Pass a persona (e.g. the one-click account the recruiter clicked) so the
+ * console shows that real identity instead of a generic "demo" user.
+ */
+export function startDemoSession(persona?: Partial<User>) {
   if (typeof window === "undefined") return;
   localStorage.setItem("riskos_demo", "1");
-  setSession(DEMO_TOKEN, DEMO_USER);
+  const user: User = persona
+    ? { id: persona.id ?? 1, email: persona.email ?? DEMO_USER.email, name: persona.name ?? DEMO_USER.name,
+        role: persona.role ?? DEMO_USER.role, permissions: ["*"] }
+    : DEMO_USER;
+  setSession(DEMO_TOKEN, user);
   setApiStatus("demo");
 }
 
